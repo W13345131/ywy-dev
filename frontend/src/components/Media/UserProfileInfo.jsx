@@ -1,32 +1,33 @@
 import React from 'react';
-import { Verified, PenBox, MapPin, Calendar } from 'lucide-react';
+import { Verified, PenBox, MapPin, Calendar, User as UserIcon } from 'lucide-react';
 import moment from 'moment';
 
-const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
+const UserProfileInfo = ({ user, posts, isOwnProfile, setShowEdit }) => {
     return (
         <div className='relative py-4 px-6 md:px-8 bg-white'>
             <div className='flex flex-col md:flex-row items-start gap-6'>
                 <div className='w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full'>
-                    <img src={user.profile_picture} alt="" className='absolute rounded-full z-2' />
+                    {user.profile_picture ? (
+                        <img src={user.profile_picture} alt="" className='absolute inset-0 w-full h-full rounded-full z-2 object-cover' />
+                    ) : (
+                        <div className='absolute inset-0 rounded-full z-2 bg-slate-100 flex items-center justify-center text-slate-400'>
+                            <UserIcon className='size-12' />
+                        </div>
+                    )}
                 </div>
 
                 <div className='w-full pt-16 md:pt-0 md:pl-36'>
                     <div className='flex flex-col md:flex-row items-start justify-between'>
                         <div>
                             <div className='flex items-center gap-3'>
-                                <h1 className='text-2xl font-bold text-gray-900'>{user.full_name}</h1>
+                                <h1 className='text-2xl font-bold text-gray-900'>{user.username}</h1>
                                 <Verified className='size-6 text-blue-600' />
                             </div>
-                            <p className='text-gray-600'>
-                                {
-                                    user.username ? `@${user.username}` : 'Add a username'
-                                }
-                            </p>
                         </div>
 
                         {/* Edit Button */}
                         {
-                            1 && (
+                            isOwnProfile && (
                                 <button className='flex items-center gap-2 border border-gray-300 hover:bg-gray-50
                                 px-4 py-2 rounded-lg font-medium transition-colors mt-4 md:mt-0 cursor-pointer' onClick={() => setShowEdit(true)}>
                                     <PenBox className='size-5' />

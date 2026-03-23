@@ -11,14 +11,22 @@ const storage = multer.diskStorage({
     }
 })
 
-// 限制上传文件类型，只允许 JPEG, PNG, JPG 文件上传
+// 限制上传文件类型，支持图片和常见视频格式
 const fileFilter = (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg']
-    // 如果文件类型是 JPEG, PNG, JPG，则允许上传
+    const allowedTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'image/webp',
+        'video/mp4',
+        'video/webm',
+        'video/quicktime',
+    ]
+    // 如果文件类型在允许列表中，则允许上传
     if(allowedTypes.includes(file.mimetype)) {
         cb(null, true)
     } else {
-        cb(new Error('Only JPEG, PNG, JPG files are allowed'), false)
+        cb(new Error('Only image and video files are allowed'), false)
     }
 }
 

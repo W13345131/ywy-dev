@@ -36,6 +36,7 @@ function App() {
 
   const { isAuthenticated, loading } = useAuth();
 
+
   if (loading) {
     return (
       // h-screen 表示高度占满整个屏幕
@@ -90,6 +91,7 @@ function App() {
           <Route path='/media/chat-box' element={<Messages />} />
           <Route path='/media/connections' element={<Connection />} />
           <Route path='/media/discover' element={<Discover />} />
+          <Route path='/media/profile' element={<Profile />} />
           <Route path='/media/profile/:id' element={<Profile />} />
           <Route path='/media/chat-box/:id' element={<ChatBox />} />
           <Route path='/media/create-post' element={<CreatePost />} />

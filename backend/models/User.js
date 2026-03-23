@@ -60,6 +60,10 @@ const userSchema = new mongoose.Schema({
         type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         default: [],
     },
+    connections: {
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        default: [],
+    },
 }, { 
     // 创建时间,更新时间
     // Mongoose 自动加两个字段：createdAt：创建时间；supdatedAt：更新时间（每次保存更新会变）

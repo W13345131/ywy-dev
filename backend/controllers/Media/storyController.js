@@ -15,10 +15,17 @@ export const addUserStory = async (req, res, next) => {
         const { content, media_type, background_color } = req.body;
 
         const media = req.file;
+        const normalizedMediaType = media_type || 'text';
 
         let media_url = '';
 
-        if(media_type === 'image' || media_type === 'video') {
+        if (normalizedMediaType === 'image' || normalizedMediaType === 'video') {
+            if (!media) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Media file is required',
+                });
+            }
 
             const buffer = fs.readFileSync(media.path);
 
@@ -32,10 +39,10 @@ export const addUserStory = async (req, res, next) => {
 
         const story = await Story.create({
             user: userId,
-            content,
+            content: content || '',
             media_url,
-            media_type,
-            background_color,
+            media_type: normalizedMediaType,
+            background_color: background_color || '#4f46e5',
         });
 
         res.status(201).json({
@@ -54,8 +61,14 @@ export const getUserStories = async (req, res, next) => {
     try {
         const userId = req.user._id;
         const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'User not found',
+            });
+        }
 
-        const userIds = [userId, ...user.connections, ...user.following];
+        const userIds = [userId, ...(user.connections || []), ...(user.following || [])];
 
         const stories = await Story.find({ user: { $in: userIds } }).populate('user').sort({ createdAt: -1 });
 

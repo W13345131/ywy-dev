@@ -1,18 +1,47 @@
 import React, { useState } from 'react';
-import { dummyUserData } from '../../assets/assets';
-import { X, ImageIcon } from 'lucide-react';
+import { X, ImageIcon, User as UserIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContent';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
 const CreatePost = () => {
-
-
+    const navigate = useNavigate();
+    const { user } = useAuth();
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const user = dummyUserData;
+    const profilePicture = user?.profileImageUrl || user?.profile_picture || '';
 
-    const handleSubmit = async () => {}
+    const handleSubmit = async () => {
+        if (!content.trim() && images.length === 0) {
+            throw new Error('Post content or image is required');
+        }
+
+        setLoading(true);
+        try {
+            const formData = new FormData();
+            const postType = images.length > 0
+                ? (content.trim() ? 'text_with_image' : 'image')
+                : 'text';
+
+            formData.append('content', content.trim());
+            formData.append('post_type', postType);
+
+            images.forEach((image) => {
+                formData.append('images', image);
+            });
+
+            await axiosInstance.post(API_PATHS.MEDIA.ADD_POST, formData);
+            setContent('');
+            setImages([]);
+            navigate('/media/home');
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className='min-h-screen bg-gradient-to-b from-slate-50 to-white'>
@@ -31,12 +60,15 @@ const CreatePost = () => {
                 <div className='max-w-xl bg-white p-4 sm:p-6 sm:pb-3 rounded-xl shadow-md space-y-4'>
                     {/* Header */}
                     <div className='flex items-center gap-3'>
-                        <img src={user.profile_picture} alt="" className='size-12 rounded-full shadow' />
+                    {profilePicture ? (
+                        <img src={profilePicture} alt="" className='size-12 rounded-full shadow object-cover' />
+                    ) : (
+                        <div className='size-12 rounded-full shadow bg-slate-100 flex items-center justify-center text-slate-400'>
+                            <UserIcon className='size-6' />
+                        </div>
+                    )}
                         <div className=''>
-                            <h2 className='font-semibold'>{user.full_name}</h2>
-                            <p className='text-gray-500 text-sm'>
-                                @{user.username}
-                            </p>
+                            <h2 className='font-semibold'>{user?.username}</h2>
                         </div>
                     </div>
 
@@ -72,7 +104,17 @@ const CreatePost = () => {
                             <ImageIcon className='size-6' />
                         </label>
 
-                        <input type="file" id="images" accept='image/*' hidden multiple onChange={(e) => setImages([...images, ...e.target.files])} />
+                        <input
+                            type="file"
+                            id="images"
+                            accept='image/*'
+                            hidden
+                            multiple
+                            onChange={(e) => {
+                                const nextFiles = Array.from(e.target.files || []);
+                                setImages((prev) => [...prev, ...nextFiles].slice(0, 4));
+                            }}
+                        />
 
                         <button onClick={() => toast.promise(
                             handleSubmit(), 

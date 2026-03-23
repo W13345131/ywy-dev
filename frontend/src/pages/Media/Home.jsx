@@ -1,20 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { assets, dummyPostsData } from '../../assets/assets';
 import StoriesBar from '../../components/Media/StoriesBar';
 import PostCard from '../../components/Media/PostCard';
 import RecentMessage from '../../components/Media/RecentMessage';
-
-
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
 const Home = () => {
-
     const [feeds, setFeeds] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchFeeds = async () => {
-        setFeeds(dummyPostsData);
-        setLoading(false);
-    }
+        try {
+            const res = await axiosInstance.get(API_PATHS.MEDIA.GET_POSTS);
+            const posts = (res?.data?.data || []).map((post) => ({
+                ...post,
+                image_urls: post.image_urls || [],
+                likes_count: post.likes_count || [],
+                comments: (post.comments || []).map((comment) => ({
+                    ...comment,
+                    user: comment.user ? {
+                        ...comment.user,
+                        profile_picture: comment.user.profileImageUrl || comment.user.profile_picture || '',
+                    } : null,
+                    replies: (comment.replies || []).map((reply) => ({
+                        ...reply,
+                        user: reply.user ? {
+                            ...reply.user,
+                            profile_picture: reply.user.profileImageUrl || reply.user.profile_picture || '',
+                        } : null,
+                    })),
+                })),
+                user: post.user ? {
+                    ...post.user,
+                    profile_picture: post.user.profileImageUrl || post.user.profile_picture || '',
+                } : null,
+            }));
+            setFeeds(posts);
+        } catch (err) {
+            setFeeds([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchFeeds();
@@ -34,17 +61,7 @@ const Home = () => {
                 </div>
             </div>
             {/* Right Sidebar */}
-            <div className='max-xl:hidden sticky top-0'>
-                <div className='max-w-xs bg-white text-xs p-4 rounded-md inline-flex flex-col gap-2 shadow'>
-                    <h3 className='font-semibold text-slate-800'>Sponsored</h3>
-                    <img src={assets.sponsored_img} alt="" className='w-75 h-50 rounded-md' />
-                    <p className='text-slate-600'>
-                        Email marketing
-                    </p>
-                    <p className='text-slate-400'>
-                        Email marketing is the process of sending commercial messages, typically to a group of people using email, to promote or sell products or services.
-                    </p>
-                </div>
+            <div className='max-xl:hidden sticky top-0 w-75 h-full'>
                 <RecentMessage />
             </div>
         </div>

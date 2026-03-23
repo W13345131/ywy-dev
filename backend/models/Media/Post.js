@@ -1,5 +1,40 @@
 import mongoose from 'mongoose';
 
+const replySchema = new mongoose.Schema({
+    user: {
+        type: String,
+        required: true,
+        ref: 'User',
+    },
+    replyToUsername: {
+        type: String,
+        default: '',
+    },
+    content: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+}, {
+    timestamps: true,
+});
+
+const commentSchema = new mongoose.Schema({
+    user: {
+        type: String,
+        required: true,
+        ref: 'User',
+    },
+    content: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    replies: [replySchema],
+}, {
+    timestamps: true,
+});
+
 const postSchema = new mongoose.Schema({
     user: {
         type: String,
@@ -24,7 +59,8 @@ const postSchema = new mongoose.Schema({
             type: String,
             ref: 'User',
         }
-    ]
+    ],
+    comments: [commentSchema],
 }, {
     timestamps: true,
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BadgeCheck, X } from 'lucide-react';
+import { BadgeCheck, X, User as UserIcon } from 'lucide-react';
 
 const StoryViewer = ({ viewStory, setViewStory }) => {
 
@@ -78,9 +78,15 @@ const StoryViewer = ({ viewStory, setViewStory }) => {
 
             {/* User Info */}
             <div className='absolute top-4 left-4 flex items-center space-x-3 p-2 px-4 sm:p-4 sm:px-8 backdrop-blur-2xl rounded bg-black/50'>
-            <img src={viewStory.user?.profile_picture} alt="" className='size-7 sm:size-8 rounded-full object-cover border border-white' />
+            {viewStory.user?.profile_picture ? (
+                <img src={viewStory.user.profile_picture} alt="" className='size-7 sm:size-8 rounded-full object-cover border border-white' />
+            ) : (
+                <div className='size-7 sm:size-8 rounded-full border border-white bg-white/90 flex items-center justify-center text-slate-400'>
+                    <UserIcon className='size-4' />
+                </div>
+            )}
             <div className='text-white font-medium flex items-center gap-1.5'>
-                <span>{viewStory.user?.full_name}</span>
+                <span>{viewStory.user?.username}</span>
                 <BadgeCheck size={18} />
             </div>
             </div>

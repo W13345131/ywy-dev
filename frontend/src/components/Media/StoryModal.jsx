@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Sparkle, TextIcon, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
 const StoryModal = ({ setShowStoryModal, fetchStories }) => {
 
@@ -25,7 +27,30 @@ const StoryModal = ({ setShowStoryModal, fetchStories }) => {
         }
     }
 
-    const handleCreateStory = async () => {}
+    const handleCreateStory = async () => {
+        const isTextMode = mode === 'text';
+
+        if (isTextMode && !text.trim()) {
+            throw new Error('Story content is required');
+        }
+
+        if (!isTextMode && !media) {
+            throw new Error('Please select a media file');
+        }
+
+        const formData = new FormData();
+        formData.append('content', text.trim());
+        formData.append('media_type', isTextMode ? 'text' : media.type.startsWith('video') ? 'video' : 'image');
+        formData.append('background_color', background);
+
+        if (media) {
+            formData.append('media', media);
+        }
+
+        await axiosInstance.post(API_PATHS.MEDIA.ADD_STORY, formData);
+        await fetchStories();
+        setShowStoryModal(false);
+    }
 
 
 

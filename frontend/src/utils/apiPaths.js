@@ -89,6 +89,29 @@ export const AUTH_API_PATHS = {
         UPLOAD_IMAGE: '/api/auth/upload-image'
     },
 
+    MEDIA: {
+        GET_USER_DATA: '/api/media/users/data',
+        UPDATE_USER: '/api/media/users/update',
+        GET_USER_PROFILE: (profileId) => `/api/media/users/profiles/${profileId}`,
+        DISCOVER_USERS: '/api/media/users/discover',
+        FOLLOW_USER: '/api/media/users/follow',
+        CONNECT_USER: '/api/media/users/connect',
+        ADD_POST: '/api/media/posts/add',
+        GET_POSTS: '/api/media/posts/get',
+        LIKE_POST: '/api/media/posts/like',
+        GET_STORIES: '/api/media/stories/get',
+        ADD_STORY: '/api/media/stories/add',
+        GET_POST_COMMENTS: (postId) => `/api/media/posts/${postId}/comments`,
+        ADD_POST_COMMENT: (postId) => `/api/media/posts/${postId}/comments`,
+        ADD_COMMENT_REPLY: (postId, commentId) => `/api/media/posts/${postId}/comments/${commentId}/replies`,
+        GET_RECENT_MESSAGES: '/api/media/messages/recent',
+        GET_MESSAGES: (userId) => `/api/media/messages/conversation/${userId}`,
+        SEND_MESSAGE: '/api/media/messages/send',
+        GET_CONNECTIONS: '/api/media/users/connections',
+        ACCEPT_CONNECTION: '/api/media/users/accept',
+        UNFOLLOW_USER: '/api/media/users/unfollow',
+    },
+
 }
 
 export const API_PATHS = AUTH_API_PATHS

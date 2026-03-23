@@ -1,22 +1,72 @@
-import React, { useState } from 'react';
-import { dummyUserData } from '../../assets/assets';
-import { Pencil } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pencil, User as UserIcon } from 'lucide-react';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
 
-const ProfileModal = ({ setShowEdit }) => {
+const ProfileModal = ({ user, setShowEdit, onUpdated }) => {
 
-    const user = dummyUserData;
-
-    const [editForm, setEditForm] =useState({
-        username: user.username,
-        bio: user.bio,
-        location: user.location,
+    const [editForm, setEditForm] = useState({
+        username: '',
+        bio: '',
+        location: '',
         profile_picture: null,
         cover_photo: null,
-        full_name: user.full_name,
     });
+
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+        setEditForm({
+            username: user.username || '',
+            bio: user.bio || '',
+            location: user.location || '',
+            profile_picture: null,
+            cover_photo: null,
+        });
+    }, [user]);
+
+    const profilePreview = useMemo(() => {
+        if (editForm.profile_picture) {
+            return URL.createObjectURL(editForm.profile_picture);
+        }
+        return user?.profile_picture || '';
+    }, [editForm.profile_picture, user?.profile_picture]);
+
+    const coverPreview = useMemo(() => {
+        if (editForm.cover_photo) {
+            return URL.createObjectURL(editForm.cover_photo);
+        }
+        return user?.cover_photo || '';
+    }, [editForm.cover_photo, user?.cover_photo]);
 
     const handleSaveProfile = async (e) => {
         e.preventDefault();
+        try {
+            setSubmitting(true);
+            const formData = new FormData();
+            formData.append('username', editForm.username.trim());
+            formData.append('bio', editForm.bio);
+            formData.append('location', editForm.location);
+
+            if (editForm.profile_picture) {
+                formData.append('profileImageUrl', editForm.profile_picture);
+            }
+
+            if (editForm.cover_photo) {
+                formData.append('coverImageUrl', editForm.cover_photo);
+            }
+
+            const res = await axiosInstance.put(API_PATHS.MEDIA.UPDATE_USER, formData);
+            const updatedUser = res?.data?.data;
+
+            onUpdated?.(updatedUser);
+            setShowEdit(false);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false);
+        }
     }
 
 
@@ -37,13 +87,16 @@ const ProfileModal = ({ setShowEdit }) => {
                                 />
 
                                 <div className='group/profile relative'>
-                                <img 
-                                src={editForm.profile_picture 
-                                ? URL.createObjectURL(editForm.profile_picture)
-                                : user.profile_picture
-                                }
-                                className='size-24 rounded-full object-cover mt-2'
-                                />
+                                {profilePreview ? (
+                                    <img 
+                                    src={profilePreview}
+                                    className='size-24 rounded-full object-cover mt-2'
+                                    />
+                                ) : (
+                                    <div className='size-24 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mt-2'>
+                                        <UserIcon className='size-10' />
+                                    </div>
+                                )}
 
                                 <div className='absolute hidden group-hover/profile:flex inset-0 bg-black/20 rounded-full items-center justify-center'>
                                     <Pencil className='size-5 text-white' />
@@ -61,25 +114,18 @@ const ProfileModal = ({ setShowEdit }) => {
                                 onChange={(e) => setEditForm({ ...editForm, cover_photo: e.target.files[0] })}
                                 />
                                 <div className='group/cover relative'>
-                                    <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user.cover_photo} alt="" 
-                                    className='w-80 h-40 rounded-lg bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2'
-                                    />
+                                    {coverPreview ? (
+                                        <img src={coverPreview} alt="" 
+                                        className='w-80 h-40 rounded-lg object-cover mt-2'
+                                        />
+                                    ) : (
+                                        <div className='w-80 h-40 rounded-lg mt-2' />
+                                    )}
                                     <div className='absolute hidden group-hover/cover:flex inset-0 bg-black/20 rounded-lg items-center justify-center'>
                                         <Pencil className='size-5 text-white' />
                                     </div>
                                 </div>
                             </label>
-                        </div>
-
-                        <div>
-                            <label className='block text-sm font-medium text-gray-700 mb-1'>
-                                Name
-                            </label>
-                            <input type="text" className='w-full p-3 border border-gray-200 rounded-lg'
-                            placeholder='Please enter your full name'
-                            onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
-                            value={editForm.full_name}
-                            />
                         </div>
 
                         <div>
@@ -117,7 +163,7 @@ const ProfileModal = ({ setShowEdit }) => {
 
                         <div className='flex justify-end space-x-3 pt-6'>
                             <button onClick={() => setShowEdit(false)} type='button' className='px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition cursor-pointer'>Cancel</button>
-                            <button type='submit' className='px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer text-white'>Save Changes</button>
+                            <button disabled={submitting} type='submit' className='px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-lg hover:from-indigo-600 hover:to-purple-700 active:scale-95 transition cursor-pointer text-white'>Save Changes</button>
                         </div>
                     </form>
                 </div>

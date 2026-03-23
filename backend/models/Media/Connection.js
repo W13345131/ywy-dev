@@ -12,6 +12,11 @@ const connectionSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    status: {
+        type: String,
+        enum: ['pending', 'accepted'],
+        default: 'pending',
+    },
 }, {
     timestamps: true,
 });

@@ -3,6 +3,27 @@ import fs from 'fs';
 import imagekit from '../../config/imageKit.js';
 import Connection from '../../models/Media/Connection.js';
 import Post from '../../models/Media/Post.js';
+import mongoose from 'mongoose';
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+
+const sanitizePostUsers = (post) => {
+    if (!post?.comments?.length) return post;
+
+    post.comments.forEach((comment) => {
+        if (!isValidObjectId(comment.user)) {
+            comment.user = null;
+        }
+
+        (comment.replies || []).forEach((reply) => {
+            if (!isValidObjectId(reply.user)) {
+                reply.user = null;
+            }
+        });
+    });
+
+    return post;
+};
 
 
 // 
@@ -246,14 +267,16 @@ export const sendConnectionRequest = async (req, res, next) => {
         }
 
         const existingConnection = await Connection.findOne({
-            from_user_id: req.user._id,
-            to_user_id: userId,
+            $or: [
+                { from_user_id: req.user._id, to_user_id: userId },
+                { from_user_id: userId, to_user_id: req.user._id },
+            ],
         });
 
         if (existingConnection) {
             return res.status(400).json({
                 success: false,
-                error: 'Connection request already sent',
+                error: existingConnection.status === 'accepted' ? 'You are already connected' : 'Connection request already sent',
                 statusCode: 400,
             });
         }
@@ -289,18 +312,38 @@ export const sendConnectionRequest = async (req, res, next) => {
 export const getUserConnections = async (req, res, next) => {
 
     try {
-        const { userId } = req.body;
+        const userId = req.user._id;
 
         const user = await User.findById(userId).populate('connections followers following');
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found',
+                statusCode: 404,
+            });
+        }
 
-        const connections = user.connections;
-        const followers = user.followers;
-        const following = user.following;
+        const connections = user.connections || [];
+        const followers = user.followers || [];
+        const following = user.following || [];
 
-        const pendingConnections = await Connection.find({
+        const pendingConnectionDocs = await Connection.find({
             to_user_id: userId,
             status: 'pending',
-        }.populate('from_user_id')).map((connection) => connection.from_user_id);
+        }).populate('from_user_id');
+
+        const sentPendingConnectionDocs = await Connection.find({
+            from_user_id: userId,
+            status: 'pending',
+        }).populate('to_user_id');
+
+        const pendingConnections = pendingConnectionDocs
+            .map((connection) => connection.from_user_id)
+            .filter(Boolean);
+
+        const sentPendingConnections = sentPendingConnectionDocs
+            .map((connection) => connection.to_user_id)
+            .filter(Boolean);
 
         res.status(200).json({
             success: true,
@@ -308,6 +351,8 @@ export const getUserConnections = async (req, res, next) => {
                 connections,
                 followers,
                 following,
+                pendingConnections,
+                sentPendingConnections,
             },
         });
 
@@ -323,8 +368,9 @@ export const acceptConnectionRequest = async (req, res, next) => {
         const { userId } = req.body;
 
         const connection = await Connection.findOne({
-            from_user_id: req.user._id,
-            to_user_id: userId,
+            from_user_id: userId,
+            to_user_id: req.user._id,
+            status: 'pending',
         });
 
         if(!connection) {
@@ -336,12 +382,28 @@ export const acceptConnectionRequest = async (req, res, next) => {
         }
 
         const user = await User.findById(userId);
-
-        user.connections.push(req.user._id);
-        await user.save();
-
         const toUser = await User.findById(req.user._id);
-        toUser.connections.push(userId);
+
+        if (!user || !toUser) {
+            return res.status(404).json({
+                success: false,
+                error: 'User not found',
+                statusCode: 404,
+            });
+        }
+
+        user.connections = user.connections || [];
+        toUser.connections = toUser.connections || [];
+
+        if (!user.connections.some((id) => id.toString() === req.user._id.toString())) {
+            user.connections.push(req.user._id);
+        }
+
+        if (!toUser.connections.some((id) => id.toString() === userId)) {
+            toUser.connections.push(userId);
+        }
+
+        await user.save();
         await toUser.save();
 
         connection.status = 'accepted';
@@ -360,9 +422,10 @@ export const acceptConnectionRequest = async (req, res, next) => {
 export const getUserProfiles = async (req, res, next) => {
 
     try {
-        const { profileId } = req.body;
+        const rawProfileId = req.params.profileId || req.query.profileId || req.body?.profileId;
+        const profileId = isValidObjectId(rawProfileId) ? rawProfileId : req.user?._id;
 
-        const profile = await User.findById(profileId);
+        const profile = await User.findById(profileId).select('-password');
 
         if(!profile) {
             return res.status(404).json({
@@ -372,7 +435,14 @@ export const getUserProfiles = async (req, res, next) => {
             });
         }
 
-        const posts = await Post.find({ user: profileId }).populate('user');
+        const posts = await Post.find({ user: profileId }).sort({ createdAt: -1 });
+
+        await Promise.all(posts.map(async (post) => {
+            sanitizePostUsers(post);
+            await post.populate('user');
+            await post.populate('comments.user');
+            await post.populate('comments.replies.user');
+        }));
 
         res.status(200).json({
             success: true,

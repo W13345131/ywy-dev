@@ -11,9 +11,9 @@ import {
 
 const router = express.Router();
 
-router.get('/:userId', protect, sseController);
-router.post('/send', protect, upload.single('image'), sendMessage);
-router.get('/messages', protect, getMessages);
 router.get('/recent', protect, getRecentMessages);
+router.get('/conversation/:userId', protect, getMessages);
+router.post('/send', protect, upload.single('image'), sendMessage);
+router.get('/stream/:userId', protect, sseController);
 
 export default router;
