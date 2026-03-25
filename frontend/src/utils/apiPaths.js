@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:5555';
+export const BASE_URL = 'https://api.ywy0701.com';
 
 export const AUTH_API_PATHS = {
     AUTH: {

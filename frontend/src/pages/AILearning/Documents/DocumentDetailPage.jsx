@@ -8,6 +8,7 @@ import { ExternalLink, ArrowLeft } from 'lucide-react';
 import PageHeader from '../../../components/common/PageHeader';
 import Tabs from '../../../components/common/Tabs';
 import { Link } from 'react-router-dom';
+import { BASE_URL } from '../../../utils/apiPaths';
 import ChatInterface from '../../../components/AILearning/chat/ChatInterface';
 import AIAction from '../../../components/AILearning/ai/AIAction';
 import FlashcardManager from '../../../components/AILearning/flashcards/FlashcardManager';
@@ -59,7 +60,7 @@ function DocumentDetailPage() {
     }
 
     // 获取 API 基础 URL
-    const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5555';
+    const baseUrl = BASE_URL;
     // 返回完整的文件 URL
     return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
   }

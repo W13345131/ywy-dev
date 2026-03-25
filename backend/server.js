@@ -46,13 +46,30 @@ const app = express()
 // 连接数据库
 connectDB();
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://ywy0701.com',
+    'http://ywy0701.com',
+    'https://www.ywy0701.com',
+    'http://www.ywy0701.com',
+    'https://api.ywy0701.com',
+    'http://api.ywy0701.com',
+];
+
 // 跨域处理
 app.use(
     cors({
-        // 允许所有域名访问
-        origin: "*",
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+                return;
+            }
+
+            callback(new Error('Not allowed by CORS'));
+        },
         // 允许的请求方法
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         // 允许的请求头
         allowedHeaders: ["Content-Type", "Authorization"],
         // 允许携带凭证
