@@ -7,36 +7,59 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 
 const CreatePost = () => {
+
+    // 导航
     const navigate = useNavigate();
+    // 用户信息
     const { user } = useAuth();
+    // 内容
     const [content, setContent] = useState('');
+    // 图片
     const [images, setImages] = useState([]);
+    // 加载状态
     const [loading, setLoading] = useState(false);
 
+    // 用户头像
     const profilePicture = user?.profileImageUrl || user?.profile_picture || '';
 
+    // 处理提交
     const handleSubmit = async () => {
+        // 如果内容为空，且图片数组为空，则抛出错误
         if (!content.trim() && images.length === 0) {
             throw new Error('Post content or image is required');
         }
 
         setLoading(true);
+
+        // 尝试提交
         try {
+            // 创建 FormData 对象
             const formData = new FormData();
+            // 如果图片数组长度大于0，且文本内容不为空，则帖子类型为文本和图片
+            // 如果图片数组长度大于0，且文本内容为空，则帖子类型为图片
+            // 否则帖子类型为文本
             const postType = images.length > 0
                 ? (content.trim() ? 'text_with_image' : 'image')
                 : 'text';
 
+            // 添加文本内容
             formData.append('content', content.trim());
+            // 添加帖子类型
             formData.append('post_type', postType);
 
+            // 遍历图片数组，添加图片
             images.forEach((image) => {
+                // 添加图片
                 formData.append('images', image);
             });
 
+            // 调用 axiosInstance 的 post 方法，添加帖子
             await axiosInstance.post(API_PATHS.MEDIA.ADD_POST, formData);
+            // 清空文本内容
             setContent('');
+            // 清空图片数组
             setImages([]);
+            // 导航到首页
             navigate('/media/home');
         } finally {
             setLoading(false);
@@ -60,6 +83,7 @@ const CreatePost = () => {
                 <div className='max-w-xl bg-white p-4 sm:p-6 sm:pb-3 rounded-xl shadow-md space-y-4'>
                     {/* Header */}
                     <div className='flex items-center gap-3'>
+                    {/* 如果用户有头像，则显示头像 */}
                     {profilePicture ? (
                         <img src={profilePicture} alt="" className='size-12 rounded-full shadow object-cover' />
                     ) : (
@@ -82,12 +106,20 @@ const CreatePost = () => {
 
                     {/* Images */}
                     {
+                        // 如果图片数组长度大于0，则显示图片
                         images.length > 0 && (
+                            // flex-wrap 让图片换行
                             <div className='flex flex-wrap gap-2 mt-4'>
                                 {
                                     images.map((image, index) => (
+                                        // 显示图片
+                                        // key 为图片索引
+                                        // className 为相对定位，组内元素 hover 时显示删除按钮
                                         <div key={index} className='relative group'>
+                                            // 显示图片
                                             <img src={URL.createObjectURL(image)} alt="" className='h-20 rounded-md' />
+                                            // 点击删除图片
+                                            // 使用 filter 方法过滤掉当前图片，然后更新图片数组
                                             <div onClick={() => setImages(images.filter((_, i) => i !== index))} className='absolute hidden group-hover:flex justify-center items-center inset-0 bg-black/40 rounded-md cursor-pointer'>
                                                 <X className='size-6 text-white' />
                                             </div>
@@ -104,6 +136,7 @@ const CreatePost = () => {
                             <ImageIcon className='size-6' />
                         </label>
 
+                        {/* 选择图片 */}
                         <input
                             type="file"
                             id="images"
@@ -111,12 +144,16 @@ const CreatePost = () => {
                             hidden
                             multiple
                             onChange={(e) => {
+                                // 将文件列表转换为数组
                                 const nextFiles = Array.from(e.target.files || []);
+                                // 更新图片数组，最多显示4张图片
                                 setImages((prev) => [...prev, ...nextFiles].slice(0, 4));
                             }}
                         />
 
+                        {/* 发布帖子按钮 */}
                         <button onClick={() => toast.promise(
+                            // 发布帖子
                             handleSubmit(), 
                             {
                                 loading: 'uploading...',

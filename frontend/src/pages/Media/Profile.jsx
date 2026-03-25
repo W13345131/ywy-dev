@@ -13,6 +13,7 @@ import { useAuth } from '../../context/AuthContent';
 
 const Profile = () => {
 
+    // 获取用户 ID,命名为profileId
     const { id: profileId } = useParams();
     const { user: currentUser, updateUser } = useAuth();
 
@@ -21,17 +22,25 @@ const Profile = () => {
     const [loading, setLoading] = useState(true);
     
     const [posts, setPosts] = useState([]);
+    // 点赞帖子列表
     const [likedPosts, setLikedPosts] = useState([]);
 
+    // 当前激活的标签
     const [activeTab, setActiveTab] = useState('posts');
 
+    // 是否显示编辑弹窗
     const [showEdit, setShowEdit] = useState(false);
 
+    // 当前用户 ID
     const currentUserId = currentUser?._id || currentUser?.id;
+    // 目标用户 ID
     const targetProfileId = profileId || currentUserId;
+    // 是否是自己的个人主页
     const isOwnProfile = currentUserId?.toString() === targetProfileId?.toString();
 
+    // 帖子列表
     const normalizePost = (post) => ({
+        // 展开 post
         ...post,
         image_urls: post.image_urls || [],
         likes_count: post.likes_count || [],
@@ -55,57 +64,85 @@ const Profile = () => {
         } : null,
     });
 
+    // 用户信息
     const normalizeProfile = (profile) => ({
+        // 展开 profile
         ...profile,
+        // 用户头像
         profile_picture: profile.profileImageUrl || profile.profile_picture || '',
+        // 封面照片
         cover_photo: profile.coverImageUrl || profile.cover_photo || '',
+        // 粉丝
         followers: profile.followers || [],
+        // 关注
         following: profile.following || [],
     });
 
+    // 媒体帖子列表
     const mediaPosts = posts.filter((post) => post.image_urls.length > 0);
 
+    // 获取用户信息
     const fetchUser = async () => {
         try {
             setLoading(true);
+            // 创建请求数组
             const requests = [
                 axiosInstance.get(API_PATHS.MEDIA.GET_USER_PROFILE(targetProfileId)),
             ];
 
+            // 如果当前用户是自己的个人主页，则添加获取帖子请求
             if (isOwnProfile) {
                 requests.push(axiosInstance.get(API_PATHS.MEDIA.GET_POSTS));
             }
 
+            // 等待所有请求完成
             const [profileRes, likedPostsRes] = await Promise.all(requests);
+            // 获取用户信息
             const profileData = profileRes?.data?.data?.profile;
+            // 获取帖子列表
             const postsData = profileRes?.data?.data?.posts || [];
 
+            // 更新用户信息，如果profileData存在，则更新用户信息，否则更新为null
             setUser(profileData ? normalizeProfile(profileData) : null);
+            // 更新帖子列表
             setPosts(postsData.map(normalizePost));
+            // 更新点赞帖子列表
             setLikedPosts(
+                // 如果当前用户是自己的个人主页，则更新点赞帖子列表
                 isOwnProfile
+                    // 如果点赞帖子列表存在，则更新点赞帖子列表，否则更新为空数组
                     ? (likedPostsRes?.data?.data || [])
                         .map(normalizePost)
+                        // 过滤掉不是当前用户点赞的帖子
                         .filter((post) => (post.likes_count || []).some((id) => id.toString() === currentUserId?.toString()))
                     : []
             );
         } catch (err) {
+            // 打印错误信息
             console.error(err);
+            // 更新用户信息为null
             setUser(null);
+            // 更新帖子列表为空数组
             setPosts([]);
+            // 更新点赞帖子列表为空数组
             setLikedPosts([]);
         } finally {
+            // 设置加载状态为false
             setLoading(false);
         }
     }
 
+    // 组件挂载时，获取用户信息
     useEffect(() => {
+        // 获取用户信息
         fetchUser();
     }, [targetProfileId, currentUserId, isOwnProfile]);
 
+    // 如果加载状态为true，或者用户信息为null，则显示加载中
     if (loading || !user) return <Spinner />;
 
     return (
+        // 相对定位，高度为全屏，溢出滚动，背景为灰色，内边距为6
         <div className='relative h-full overflow-y-scroll bg-gray-50 p-6'>
             <div className='max-w-3xl mx-auto'>
                 {/* profile card */}
@@ -149,9 +186,11 @@ const Profile = () => {
 
                     {/* Media */}
                     {
+                        // 如果激活的标签为媒体，则显示媒体
                         activeTab === 'media' && (
                             <div className='flex flex-wrap mt-6 max-w-6xl'>
                                 {
+                                    // 如果媒体帖子列表长度大于0，则显示媒体帖子列表
                                     mediaPosts.length > 0 ? mediaPosts.map((post) => (
                                         <React.Fragment key={post._id}>
                                         {
@@ -172,6 +211,7 @@ const Profile = () => {
                     }
 
                     {
+                        // 如果激活的标签为喜欢，则显示喜欢
                         activeTab === 'likes' && (
                             <div className='mt-6 flex flex-col items-center gap-6'>
                                 {
@@ -186,9 +226,11 @@ const Profile = () => {
             </div>
 
             {
+                // 如果显示编辑弹窗，则显示编辑弹窗
                 showEdit && (
                     <ProfileModal
                         user={user}
+                        // 设置显示编辑弹窗
                         setShowEdit={setShowEdit}
                         onUpdated={(updatedUser) => {
                             const normalized = normalizeProfile(updatedUser);

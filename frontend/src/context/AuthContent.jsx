@@ -104,7 +104,10 @@ export const AuthProvider = ({ children }) => {
     // 更新用户信息（使用函数式更新避免闭包中的 user 过期）
     const updateUser = (updatedData) => {
         setUser(prev => {
+            // 如果 prev 存在，则合并 prev 和 updatedData
+            // 否则返回 updatedData
             const newUserData = prev ? { ...prev, ...updatedData } : updatedData;
+            // 更新本地存储
             localStorage.setItem('user', JSON.stringify(newUserData));
             return newUserData;
         });
@@ -124,6 +127,7 @@ export const AuthProvider = ({ children }) => {
     // 返回 AuthContext.Provider 组件，用于包裹需要共享数据的组件
     return (
         <AuthContext.Provider value={value}>
+            {/* children 指的是：AuthProvider 包裹的所有组件 */}
             {children}
         </AuthContext.Provider>
     )

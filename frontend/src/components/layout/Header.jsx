@@ -30,7 +30,7 @@ function Header({ toggleSidebar }) {
 
         <div className='flex items-center gap-3'>
             {/* 用户个人资料 */}
-            <Link to='/profile'>
+            <Link to='/media/profile'>
             <div className='flex items-center gap-3'>
                 <div className='flex items-center gap-3 py-1.5 px-3 rounded-xl hover:bg-slate-50 transition-colors duration-200 cursor-pointer group'>
                     <div className='w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-emerald-400 to-teal-500 

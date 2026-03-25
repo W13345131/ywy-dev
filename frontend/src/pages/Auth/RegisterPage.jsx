@@ -185,7 +185,7 @@ function RegisterPage() {
                       </>
                     ) : (
                       <>
-                          Sign in
+                          Sign up
                           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" strokeWidth={2.5} />
                       </>
                     )}

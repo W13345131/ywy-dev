@@ -29,7 +29,10 @@ axiosInstance.interceptors.request.use(
             // 添加 Authorization 请求头，值为 Bearer + token
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
-        // 发送 FormData 时移除 Content-Type，让浏览器自动设置 multipart/form-data 和 boundary
+        // 发送 FormData 时移除 Content-Type，让浏览器自动设置 multipart/form-data
+        // FormData 是浏览器内置的类，用于构建表单数据
+        // instanceof 运算符用于检查 config.data 是否是 FormData 的实例
+        // 如果 config.data 是 FormData 的实例，则删除 Content-Type 请求头
         if (config.data instanceof FormData) {
             delete config.headers['Content-Type'];
         }
@@ -42,6 +45,7 @@ axiosInstance.interceptors.request.use(
     }
 );
 
+// 响应拦截器，在服务器返回响应之前进行拦截
 axiosInstance.interceptors.response.use(
     // 直接把服务器返回的数据传给调用者
     (response) => {

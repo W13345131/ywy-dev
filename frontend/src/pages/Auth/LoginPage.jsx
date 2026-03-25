@@ -41,7 +41,7 @@ function LoginPage() {
       // 显示成功信息
       toast.success('Login successful');
       // 跳转至 dashboard 页面
-      navigate('/dashboard');
+      navigate('/media/home');
     } catch (error) {
       // 设置错误信息
       setError(error.message || 'Failed to login. Please check your credentials.');

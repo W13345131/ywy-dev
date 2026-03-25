@@ -9,7 +9,9 @@ import {
 
 const router = express.Router();
 
+// 添加故事
 router.post('/add', protect, upload.single('media'), addUserStory);
+// 获取故事
 router.get('/get', protect, getUserStories);
 
 export default router;

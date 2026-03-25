@@ -6,7 +6,9 @@ import { API_PATHS } from '../../utils/apiPaths';
 
 const Connection = () => {
 
+    // 当前标签
     const [currentTab, setCurrentTab] = useState('Followers');
+    // 连接数据
     const [connectionData, setConnectionData] = useState({
         followers: [],
         following: [],
@@ -14,22 +16,31 @@ const Connection = () => {
         connections: [],
     });
 
+    // 导航
     const navigate = useNavigate();
 
+    // 获取连接数据
     const fetchConnections = async () => {
         try {
+            // 调用 axiosInstance 的 get 方法，获取连接数据
             const res = await axiosInstance.get(API_PATHS.MEDIA.GET_CONNECTIONS);
             const data = res?.data?.data || {};
             const normalizeUsers = (users = []) =>
                 users.map((user) => ({
+                    // 展开 user
                     ...user,
                     profile_picture: user.profileImageUrl || user.profile_picture || '',
                 }));
 
+            // 更新连接数据
             setConnectionData({
+                // 粉丝
                 followers: normalizeUsers(data.followers),
+                // 关注
                 following: normalizeUsers(data.following),
+                // 待接受
                 pendingConnections: normalizeUsers(data.pendingConnections),
+                // 连接
                 connections: normalizeUsers(data.connections),
             });
         } catch (err) {
@@ -43,46 +54,58 @@ const Connection = () => {
         }
     };
 
+    // 组件挂载后，获取连接数据
     useEffect(() => {
         fetchConnections();
     }, []);
 
+    // 取消关注
     const handleUnfollow = async (userId) => {
         try {
+            // 调用 axiosInstance 的 post 方法，取消关注
             await axiosInstance.post(API_PATHS.MEDIA.UNFOLLOW_USER, { userId });
+            // 重新获取连接数据
             fetchConnections();
         } catch (err) {
             console.error(err);
         }
     };
 
+    // 接受连接
     const handleAccept = async (userId) => {
         try {
+            // 调用 axiosInstance 的 post 方法，接受连接
             await axiosInstance.post(API_PATHS.MEDIA.ACCEPT_CONNECTION, { userId });
+            // 重新获取连接数据
             fetchConnections();
         } catch (err) {
             console.error(err);
         }
     };
 
+    // 连接数据数组
     const dataArray = useMemo(() => [
         {
             label: 'Followers',
+            // 粉丝
             value: connectionData.followers,
             icon: Users
         },
         {
             label: 'Following',
+            // 关注
             value: connectionData.following,
             icon: UserCheck
         },
         {
             label: 'Pending',
+            // 待接受
             value: connectionData.pendingConnections,
             icon: UserRoundPen
         },
         {
             label: 'Connections',
+            // 连接
             value: connectionData.connections,
             icon: UserPlus
         }
@@ -102,6 +125,7 @@ const Connection = () => {
                 {/* Counts */}
                 <div className='mb-8 flex flex-wrap gap-6'>
                     {
+                        // 遍历连接数据数组
                         dataArray.map((item, index) => (
                             <div key={index} className='flex flex-col items-center justify-center gap-1 border h-20 w-40 border-gray-200
                             bg-white rounded-md shadow'>
@@ -117,13 +141,18 @@ const Connection = () => {
                 {/* Tabs */}
                 <div className='inline-flex flex-wrap items-center border border-gray-200 rounded-md p-1 bg-white shadow-sm'>
                     {
+                        // 遍历连接数据数组
                         dataArray.map((tab) => (
                             <button key={tab.label} className={`flex items-center px-3 py-1 text-sm rounded-md transition-colors cursor-pointer ${
                             currentTab === tab.label ? 'bg-white font-medium text-black' : 'text-gray-500 hover:text-black'
                             }`} onClick={() => setCurrentTab(tab.label)}>
+                                {/* 显示图标 */}
                                 <tab.icon className='size-4' />
+                                {/* 显示标签 */}
                                 <span className='ml-1'>{tab.label}</span>
+                                {/* 显示计数 */}
                                 {
+                                    // 如果计数存在，则显示计数
                                     tab.count !== undefined && (
                                         <span className='ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full'>
                                             {tab.count}
@@ -138,8 +167,11 @@ const Connection = () => {
                 {/* Connections List */}
                 <div className='flex flex-wrap gap-6 mt-6'>
                     {
+                        // 遍历当前标签的连接数据
+                        // 如果当前标签等于标签的 label，则返回标签的 value，否则返回空数组
                         (dataArray.find((tab) => tab.label === currentTab)?.value ?? []).map((user) => (
                             <div key={user._id} className='w-full max-w-88 flex gap-5 p-6 bg-white shadow rounded-md'>
+                                {/* 如果用户有头像，则显示头像 */}
                                 {user.profile_picture ? (
                                     <img src={user.profile_picture} alt="" className='size-12 rounded-full shadow-md mx-auto object-cover' />
                                 ) : (

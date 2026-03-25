@@ -31,17 +31,19 @@ import Discover from './pages/Media/Discover'
 import Profile from './pages/Media/Profile'
 import ChatBox from './pages/Media/ChatBox'
 import CreatePost from './pages/Media/CreatePost'
+import Spinner from './components/common/Spinner'
 
 function App() {
 
+  // 获取用户认证信息
   const { isAuthenticated, loading } = useAuth();
 
-
+  // 如果正在加载，则显示加载状态
   if (loading) {
     return (
       // h-screen 表示高度占满整个屏幕
       <div className='flex justify-center items-center h-screen'>
-        <p>Loading...</p>
+        <Spinner />
       </div>
     );
   }
@@ -53,7 +55,7 @@ function App() {
         {/* replace 表示替换当前路由，不会留下历史记录 */}
         <Route
           path='/' 
-          element={isAuthenticated ? <Navigate to='/dashboard' replace /> : <Navigate to='/login' replace />} />
+          element={isAuthenticated ? <Navigate to='/media/home' replace /> : <Navigate to='/login' replace />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
 

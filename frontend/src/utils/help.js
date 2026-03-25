@@ -31,6 +31,8 @@ export const addThousandsSeparator = (num) => {
 
 // 工具函数（utility function），用于把原始支出数据 转换成柱状图（Bar Chart）需要的数据格式
 export const prepareExpenseBarChartData = (data = []) => {
+
+  // 将原始消费数据整理成柱状图可用的“类别-金额”格式数据
   const chartData = data.map((item) => ({
     category: item?.category,
     amount: item?.amount,
@@ -45,9 +47,17 @@ export const prepareIncomeBarChartData = (data) => {
   // 确保数据是数组
   const list = Array.isArray(data) ? data : [];
   // 按日期排序, 把最新的日期排在前面
+  // ...list 是 ES6 的语法，表示将 list 数组展开并复制一份
+  // sort() 方法用于对数组进行排序, 参数是一个回调函数
+  // 按日期从早到晚排序，最新的排在前面
+  // new Date(a.date) - new Date(b.date)
+  // 转成时间后相减
+  // 如果结果小于0，会让a排在b前面，否则b排在a前面
   const sortedData = [...list].sort((a, b) => new Date(a.date) - new Date(b.date));
 
+
   const chartData = sortedData.map((item) => ({
+    // 格式化日期，format() 方法用于格式化日期,'Do MMM' 表示格式化成 "第几天 月份" 的格式
     date: moment(item?.date).format('Do MMM'),
     amount: Number(item?.amount) || 0,
     source: item?.source,

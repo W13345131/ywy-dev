@@ -14,7 +14,7 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
   // 使用 React Router 的 useLocation 钩子，获取当前路径
   const location = useLocation();
   // 使用正则表达式，判断当前路径是否属于 Media 路径
-  const isMediaPath = /^\/media\/home(\/|$)/.test(location.pathname);
+  const isMediaPath = /^\/media(\/|$)/.test(location.pathname);
   // 使用正则表达式，判断当前路径是否属于 Task Manager 路径
   const isTaskManagerPath = /^\/admin\/task-manager(\/|$)/.test(location.pathname);
   // 使用正则表达式，判断当前路径是否属于 AI Learning 路径
@@ -37,14 +37,6 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
     logout();
     navigate('/login');
   }
-
-  // 定义导航链接
-  const navLinks = [
-    // 个人资料链接
-    // 使用 Lucide React 的 User 图标
-    // 显示文本：Profile
-    { to: '/profile', icon: User, text: 'Profile' },
-  ]
 
   return <>
   {/* 移动端菜单遮罩 */}
@@ -525,42 +517,6 @@ function Sidebar({ isSidebarOpen, toggleSidebar }) {
                   </div>
                 )}
             </div>
-
-            {/* 个人资料链接 */}
-            {navLinks.map((link) => (
-                <NavLink
-                // key：表示导航链接的唯一标识
-                key={link.to}
-                // to：表示导航链接的跳转路径
-                to={link.to}
-                // onClick：表示点击导航链接时执行的函数
-                onClick={toggleSidebar}
-                className={({ isActive }) => 
-                    `group flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                        isActive
-                          ? 'bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25'
-                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                    }`
-                }
-                >
-                    {({ isActive }) => (
-                        <>
-                        <link.icon
-                        size={18}
-                        strokeWidth={2.5}
-                        className={`transtion-transform durations-200 ${
-                            // 如果 isActive 为 true，则不进行缩放，否则进行缩放
-                            isActive
-                              ? ''
-                              : 'group-hover:scale-110'
-                        }`}
-                        />
-                        {/* 显示文本 */}
-                        {link.text}
-                        </>
-                    )}
-                </NavLink>
-            ))}
         </nav>
 
         {/* Logout Button */}

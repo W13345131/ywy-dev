@@ -7,6 +7,7 @@ const UserProfileInfo = ({ user, posts, isOwnProfile, setShowEdit }) => {
         <div className='relative py-4 px-6 md:px-8 bg-white'>
             <div className='flex flex-col md:flex-row items-start gap-6'>
                 <div className='w-32 h-32 border-4 border-white shadow-lg absolute -top-16 rounded-full'>
+                    {/* 如果用户头像存在，则显示用户头像 */}
                     {user.profile_picture ? (
                         <img src={user.profile_picture} alt="" className='absolute inset-0 w-full h-full rounded-full z-2 object-cover' />
                     ) : (
@@ -27,6 +28,7 @@ const UserProfileInfo = ({ user, posts, isOwnProfile, setShowEdit }) => {
 
                         {/* Edit Button */}
                         {
+                            // 如果当前用户是自己的个人主页，则显示编辑按钮
                             isOwnProfile && (
                                 <button className='flex items-center gap-2 border border-gray-300 hover:bg-gray-50
                                 px-4 py-2 rounded-lg font-medium transition-colors mt-4 md:mt-0 cursor-pointer' onClick={() => setShowEdit(true)}>
@@ -41,10 +43,12 @@ const UserProfileInfo = ({ user, posts, isOwnProfile, setShowEdit }) => {
                         {user.bio}
                     </p>
 
+                    {/* 用户信息 */}
                     <div className='flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-500 mt-4'>
                         <span className='flex items-center gap-1.5'>
+                            {/* 如果用户位置存在，则显示用户位置 */}
                             <MapPin className='size-4' />
-                            {user.location ? user.location : 'Add your location'}
+                            {user.location ? user.location : ''}
                         </span>
                         <span className='flex items-center gap-1.5'>
                             <Calendar className='size-4' />
