@@ -49,6 +49,7 @@ connectDB();
 const allowedOrigins = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'http://8.156.88.118',
     'https://ywy0701.com',
     'http://ywy0701.com',
     'https://www.ywy0701.com',

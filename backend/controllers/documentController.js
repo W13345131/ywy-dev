@@ -35,7 +35,7 @@ export const uploadDocument = async (req, res, next) => {
         }
 
         // 生成文件 URL
-        const baseUrl = process.env.APP_BASE_URL || 'https://api.ywy0701.com';
+        const baseUrl = process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
         // 文件 URL
         const fileUrl = `${baseUrl}/uploads/documents/${req.file.filename}`;
 
