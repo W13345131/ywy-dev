@@ -3,7 +3,7 @@
 // 只要有 err 参数，Express 就知道这是 错误处理中间件
 const errorHandler = (err, req, res, next) => {
     // 获取错误状态码
-    let statusCode = res.statusCode || 500;
+    let statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 500;
     // 获取错误消息
     let message = err.message || 'Internal Server Error';
 

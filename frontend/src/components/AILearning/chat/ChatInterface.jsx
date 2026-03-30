@@ -95,22 +95,29 @@ function ChatInterface() {
     try {
         // 调用 aiService.chat 方法，发送消息
         const response = await aiService.chat(documentId, userMessage.content);
+        const chatData = response?.data;
+
+        if (!chatData?.answer) {
+            throw new Error(response?.message || 'AI did not return an answer');
+        }
+
         // 创建 AI 消息对象
         const assistantMessage = {
             // 角色：AI
             role: 'assistant',
             // 内容：AI 回答
-            content: response.data.answer,
+            content: chatData.answer,
             // 时间戳：当前时间
             timestamp: new Date(),
             // 相关块索引：AI 回答的块索引
-            relevantChunks: response.data.relevantChunks,
+            relevantChunks: chatData.relevantChunks || [],
         };
         // 合并旧数组 + 新消息
         setHistory(prev => [...prev, assistantMessage]);
     } catch (error) {
        // 打印错误信息
         console.error('Chat error:', error);
+        toast.error(error?.message || 'Chat request failed');
         // 创建错误消息对象
         const errorMessage ={
             // 角色：AI
