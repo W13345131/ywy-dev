@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 import { GoogleGenAI } from '@google/genai'
 
-// 加载环境变量
-dotenv.config()
+// 加载环境变量，并以 .env 为准覆盖残留的旧环境变量
+dotenv.config({ override: true })
 
 // 如果 GEMINI_API_KEY 没有设置，则退出进程
 if (!process.env.GEMINI_API_KEY) {

@@ -1,7 +1,7 @@
 // 引入dotenv
 import dotenv from 'dotenv'
-// 加载环境变量
-dotenv.config()
+// 加载环境变量，并以 .env 为准覆盖残留的旧环境变量
+dotenv.config({ override: true })
 
 // 引入express
 import express from 'express'
