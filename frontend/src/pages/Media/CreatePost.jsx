@@ -116,10 +116,10 @@ const CreatePost = () => {
                                         // key 为图片索引
                                         // className 为相对定位，组内元素 hover 时显示删除按钮
                                         <div key={index} className='relative group'>
-                                            // 显示图片
+                                            {/* // 显示图片 */}
                                             <img src={URL.createObjectURL(image)} alt="" className='h-20 rounded-md' />
-                                            // 点击删除图片
-                                            // 使用 filter 方法过滤掉当前图片，然后更新图片数组
+                                            {/* // 点击删除图片 */}
+                                            {/* // 使用 filter 方法过滤掉当前图片，然后更新图片数组 */}
                                             <div onClick={() => setImages(images.filter((_, i) => i !== index))} className='absolute hidden group-hover:flex justify-center items-center inset-0 bg-black/40 rounded-md cursor-pointer'>
                                                 <X className='size-6 text-white' />
                                             </div>
